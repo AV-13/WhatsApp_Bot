@@ -1,0 +1,51 @@
+{
+  "intents": [
+    {
+      "name": "salutation",
+      "patterns": [
+        "bonjour",
+        "salut",
+        "bonsoir",
+        "hello"
+      ]
+    },
+    {
+      "name": "prestations",
+      "patterns": [
+        "prestations",
+        "épilation",
+        "laser",
+        "zones"
+      ]
+    },
+    {
+      "name": "tarifs",
+      "patterns": [
+        "tarif",
+        "prix",
+        "combien"
+      ]
+    },
+    {
+      "name": "rdv",
+      "patterns": [
+        "rdv",
+        "rendez-vous",
+        "disponibilités",
+        "réserver"
+      ]
+    },
+    {
+      "name": "tessan",
+      "patterns": [
+        "téléconsultation",
+        "médecin",
+        "tessan"
+      ]
+    },
+    {
+      "name": "inconnu",
+      "patterns": []
+    }
+  ]
+}

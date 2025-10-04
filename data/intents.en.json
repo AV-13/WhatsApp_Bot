@@ -1,0 +1,47 @@
+{
+  "intents": [
+    {
+      "name": "greeting",
+      "patterns": [
+        "hi",
+        "hello"
+      ]
+    },
+    {
+      "name": "services",
+      "patterns": [
+        "services",
+        "laser",
+        "hair removal"
+      ]
+    },
+    {
+      "name": "pricing",
+      "patterns": [
+        "price",
+        "pricing",
+        "how much"
+      ]
+    },
+    {
+      "name": "booking",
+      "patterns": [
+        "book",
+        "appointment",
+        "slot"
+      ]
+    },
+    {
+      "name": "tessan",
+      "patterns": [
+        "telemedicine",
+        "doctor",
+        "tessan"
+      ]
+    },
+    {
+      "name": "unknown",
+      "patterns": []
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+# Dépendances
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# Variables d'environnement
+.env
+.env.local
+.env.*.local
+
+# Fichiers de build
+dist/
+build/
+*.js
+*.js.map
+!jest.config.js
+
+# Logs
+logs/
+*.log
+
+# Caches
+.npm/
+.eslintcache
+.tsbuildinfo
+.cache/
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+
+# Fichiers d'éditeurs
+.idea/
+.vscode/
+*.swp
+*.swo
+.project
+.classpath
+.settings/
+
+# Fichiers de couverture de tests
+coverage/
+
+# Fichiers temporaires
+tmp/
+temp/
