@@ -16,6 +16,12 @@ export const config = {
   i18n: {
     defaultLocale: process.env.DEFAULT_LOCALE || 'fr',
     supported: (process.env.SUPPORTED_LOCALES || 'fr,en').split(',')
+  },
+  bodyPix: {
+    architecture: 'MobileNetV1',
+    multiplier: 0.75,
+    stride: 16,
+    quantBytes: 2
   }
 };
 

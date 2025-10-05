@@ -68,19 +68,17 @@ router.post('/', async (req, res) => {
           const mediaId = m.image?.id;
           if (mediaId) {
             try {
-              // Télécharger l'image
               const url = await getMediaUrl(mediaId);
               const imageBuffer = await downloadMedia(url);
 
               logger.debug('Image téléchargée, début de l\'analyse avec TensorFlow');
 
-              // Analyser l'image avec TensorFlow
               const imageAnalysis = await analyzeImage(imageBuffer);
-
+              console.log("imageAnalysis", imageAnalysis);
               if (imageAnalysis.bodyParts.length > 0) {
                 const bodyPart = imageAnalysis.mainBodyPart || imageAnalysis.bodyParts[0];
                 const prix = getPriceForZone(bodyPart);
-                const confidence = Math.round(imageAnalysis.confidence * 100);
+                const confidence = imageAnalysis.confidence.toFixed(2);
 
                 logger.debug(`Zone identifiée: ${bodyPart}, confiance: ${confidence}%, prix: ${prix}€`);
 

@@ -1,6 +1,6 @@
 import { config } from '../config.js';
 import { logger } from '../utils/logger.js';
-
+import fetch from 'node-fetch';
 const base = config.whatsapp.apiBase;
 const phoneNumberId = config.whatsapp.phoneNumberId;
 const authHeader = { Authorization: `Bearer ${config.whatsapp.token}` };

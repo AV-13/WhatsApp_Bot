@@ -47,11 +47,16 @@ Le bot est capable de :
 - **Transcription via Deepgram API** (ou autre STT provider configurable)
 - Traitement du texte transcrit comme un message standard
 
-### 🖼️ Analyse d'images
-- Traitement d'images avec **Jimp** pour analyser les propriétés visuelles
-- Détection des zones corporelles basée sur la **luminosité** et les **couleurs dominantes**
-- Association automatique à un **tarif** correspondant dans `data.json`
-- Logique d'identification qui peut être enrichie avec des modèles ML plus avancés
+### 🖼️ Analyse d'images (WIP)
+Le bot utilise **TensorFlow.js** et **BodyPix** pour analyser les images envoyées par l'utilisateur.
+
+- Utilisation de `@tensorflow/tfjs-node` pour l'exécution des modèles en Node.js
+- Segmentation des parties du corps via le modèle `@tensorflow-models/body-pix`
+- Détection des zones corporelles pour estimer les tarifs d'épilation
+- Analyse basée sur un modèle pré-entraîné qui reconnaît différentes parties du corps
+- Conversion d'images en tenseurs et traitement optimisé pour la détection
+
+Le processus inclut le chargement du modèle, le prétraitement de l'image, la segmentation et l'interprétation des résultats pour identifier les zones corporelles principales.
 
 ### 📘 Base de connaissances
 - Tarifs par zone et par pack
@@ -73,7 +78,7 @@ Le bot est capable de :
 | **API** | WhatsApp Cloud API (Meta)                |
 | **NLP** | Regex, fuzzy matching, JSON d’intentions |
 | **Speech-to-Text** | Deepgram API (configurable)              |
-| **Analyse d’image** | Jimp                                     |
+| **Analyse d’image** | Tensorflow BodyPix                       |
 | **Configuration** | dotenv                                   |
 | **Logging** | Winston logger personnalisé              |
 
@@ -194,12 +199,17 @@ Le bot expose deux routes :
 
 ---
 
-### 🖼️ Analyse d'images
-- Traitement d'images avec **Jimp** pour analyser les propriétés visuelles
-- Détection des zones corporelles basée sur la **luminosité** et les **couleurs dominantes**
-- Association automatique à un **tarif** correspondant dans `data.json`
-- Logique d'identification qui peut être enrichie avec des modèles ML plus avancés
-- 
+### 🖼️ Analyse d'images (WIP)
+Le bot utilise **TensorFlow.js** et **BodyPix** pour analyser les images envoyées par l'utilisateur.
+
+- Utilisation de `@tensorflow/tfjs-node` pour l'exécution des modèles en Node.js
+- Segmentation des parties du corps via le modèle `@tensorflow-models/body-pix`
+- Détection des zones corporelles pour estimer les tarifs d'épilation
+- Analyse basée sur un modèle pré-entraîné qui reconnaît différentes parties du corps
+- Conversion d'images en tenseurs et traitement optimisé pour la détection
+
+Le processus inclut le chargement du modèle, le prétraitement de l'image, la segmentation et l'interprétation des résultats pour identifier les zones corporelles principales.
+
 ---
 
 ## 🖼️ Captures d'écran
@@ -228,9 +238,7 @@ Exemples d'interactions :
 ## 🚀 Améliorations possibles
 
 ### 🔬 Analyse d'image avancée
-- Remplacement de l'analyse basique Jimp par TensorFlow.js avec modèle **BodyPix**
-- Intégration possible d'API externes : **Google Vision**, **Azure Computer Vision**
-- Utilisation de **CLIP (zero-shot)** pour l'identification précise des zones corporelles
+- Utilisation de modèles ML plus sophistiqués (ex: google Vision API)
 
 ### 🧠 NLP amélioré
 - Modèle de classification d’intentions (Naive Bayes / ML)

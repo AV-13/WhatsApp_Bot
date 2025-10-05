@@ -1,5 +1,6 @@
 import { logger } from '../utils/logger.js';
 import { config } from '../config.js';
+import fetch from 'node-fetch';
 
 export async function downloadMedia(url: string): Promise<Buffer> {
   const res = await fetch(url, {
