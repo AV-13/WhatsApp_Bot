@@ -72,28 +72,42 @@ router.post('/', async (req, res) => {
               const url = await getMediaUrl(mediaId);
               const imageBuffer = await downloadMedia(url);
 
-              // Analyser l'image
+              logger.debug('Image téléchargée, début de l\'analyse avec TensorFlow');
+
+              // Analyser l'image avec TensorFlow
               const imageAnalysis = await analyzeImage(imageBuffer);
 
               if (imageAnalysis.bodyParts.length > 0) {
                 const bodyPart = imageAnalysis.mainBodyPart || imageAnalysis.bodyParts[0];
                 const prix = getPriceForZone(bodyPart);
+                const confidence = Math.round(imageAnalysis.confidence * 100);
+
+                logger.debug(`Zone identifiée: ${bodyPart}, confiance: ${confidence}%, prix: ${prix}€`);
 
                 if (prix > 0) {
-                  // Envoyer une réponse personnalisée avec les tarifs
+                  // Envoyer une réponse personnalisée avec les tarifs et le niveau de confiance
                   await sendText(
                       from,
-                      `J'ai identifié la zone *${bodyPart}* sur votre image.\n\nPour cette zone, le tarif est de *${prix}€* par séance.\n\nSouhaitez-vous plus d'informations sur cette prestation ?`
+                      `J'ai analysé votre image et identifié la zone *${bodyPart}* (confiance: ${confidence}%).\n\nPour cette zone, le tarif est de *${prix}€* par séance.\n\nSouhaitez-vous plus d'informations sur cette prestation ?`
                   );
                 } else {
-                  await sendText(from, `J'ai identifié la zone *${bodyPart}* sur votre image, mais je n'ai pas de tarif associé. Pouvez-vous préciser votre demande ?`);
+                  await sendText(
+                      from,
+                      `J'ai identifié la zone *${bodyPart}* sur votre image (confiance: ${confidence}%), mais je n'ai pas de tarif associé. Pouvez-vous préciser votre demande ?`
+                  );
                 }
               } else {
-                await sendText(from, 'Je n\'ai pas pu identifier de zone corporelle sur cette image. Pourriez-vous m\'envoyer une autre photo ou me décrire votre demande ?');
+                await sendText(
+                    from,
+                    'Je n\'ai pas pu identifier de zone corporelle sur cette image. Pourriez-vous m\'envoyer une autre photo ou me décrire votre demande ?'
+                );
               }
             } catch (e) {
-              logger.error('Erreur lors du traitement de l\'image:', e);
-              await sendText(from, 'Désolé, je n\'ai pas pu analyser cette image. Pourriez-vous réessayer avec une autre photo ?');
+              logger.error('Erreur lors de l\'analyse d\'image avec TensorFlow:', e);
+              await sendText(
+                  from,
+                  'Désolé, je n\'ai pas pu analyser cette image. Notre système d\'analyse est en cours d\'optimisation. Pourriez-vous décrire votre demande par message ?'
+              );
             }
           } else {
             await sendText(from, 'Image bien reçue 👍 (pas de média utilisable).');

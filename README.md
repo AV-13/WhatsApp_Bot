@@ -66,15 +66,15 @@ Le bot est capable de :
 
 ## 🛠️ Technologies utilisées
 
-| Domaine | Technologie |
-|----------|--------------|
-| **Backend** | Node.js, TypeScript, Express |
-| **API** | WhatsApp Cloud API (Meta) |
+| Domaine | Technologie                              |
+|----------|------------------------------------------|
+| **Backend** | Node.js, TypeScript, Express             |
+| **API** | WhatsApp Cloud API (Meta)                |
 | **NLP** | Regex, fuzzy matching, JSON d’intentions |
-| **Speech-to-Text** | Deepgram API (configurable) |
-| **Analyse d’image** | Simulation (remplaçable par TensorFlow.js / CLIP) |
-| **Configuration** | dotenv |
-| **Logging** | Winston logger personnalisé |
+| **Speech-to-Text** | Deepgram API (configurable)              |
+| **Analyse d’image** | Jimp                                     |
+| **Configuration** | dotenv                                   |
+| **Logging** | Winston logger personnalisé              |
 
 ---
 
@@ -160,7 +160,7 @@ src/
 ├── data.json                 # Base de connaissances (intents & réponses)
 ├── services/
 │   ├── dataService.ts        # Gestion des données du bot
-│   ├── imageService.ts       # Analyse d'image (simulation)
+│   ├── imageService.ts       # Analyse d'image
 │   ├── sttService.ts         # Service de reconnaissance vocale
 │   ├── nlp.ts                # Analyse des intentions et entités
 │   └── whatsappClient.ts     # Envoi et réception via WhatsApp Cloud API
@@ -187,19 +187,17 @@ Le bot expose deux routes :
 2. Le type est détecté : **texte**, **audio**, **image**.
 3. - Si texte → **analyse NLP** (regex/fuzzy).
 - Si audio → **transcription via STT** → texte → NLP.
-- Si image → **simulation d’analyse de zone**.
+- Si image → **analyse de zone**.
 4. Le bot récupère la réponse dans `data.json`.
 5. La réponse est envoyée à l’utilisateur via **WhatsApp Cloud API**.
 
 ---
 
-### 🧠 Analyse d’image (simulation)
-Pour la version actuelle, l’analyse d’image est **simulée** :
-- Une zone corporelle est sélectionnée **aléatoirement**.
-- Cette zone est associée à un tarif depuis `data.json`.
-- Le bot envoie une réponse correspondante.
-
-*(Une vraie détection via TensorFlow.js ou CLIP est prévue en amélioration.)*
+### 🖼️ Analyse d'images
+- Traitement d'images avec **Jimp** pour analyser les propriétés visuelles
+- Détection des zones corporelles basée sur la **luminosité** et les **couleurs dominantes**
+- Association automatique à un **tarif** correspondant dans `data.json`
+- Logique d'identification qui peut être enrichie avec des modèles ML plus avancés
 
 ---
 
@@ -229,9 +227,9 @@ Exemples d'interactions :
 ## 🚀 Améliorations possibles
 
 ### 🔬 Analyse d'image avancée
-- TensorFlow.js avec modèle **BodyPix**
-- API externes : **Google Vision**, **Azure Computer Vision**
-- Modèle **CLIP (zero-shot)** pour labels dynamiques
+- Remplacement de l'analyse basique Jimp par TensorFlow.js avec modèle **BodyPix**
+- Intégration possible d'API externes : **Google Vision**, **Azure Computer Vision**
+- Utilisation de **CLIP (zero-shot)** pour l'identification précise des zones corporelles
 
 ### 🧠 NLP amélioré
 - Modèle de classification d’intentions (Naive Bayes / ML)

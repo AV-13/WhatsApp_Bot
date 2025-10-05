@@ -1,4 +1,3 @@
-// src/services/sttService.ts
 import { config } from '../config.js';
 import { logger } from '../utils/logger.js';
 import fs from 'fs';

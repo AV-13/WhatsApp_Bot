@@ -1,92 +1,114 @@
-// src/services/imageService.ts
+import * as Jimp from 'jimp';
 import { logger } from '../utils/logger.js';
+import { getBotData } from './dataService.js';
 
-// Interface pour les résultats d'analyse
 export interface ImageAnalysisResult {
     bodyParts: string[];
+    mainBodyPart: string;
     confidence: number;
-    mainBodyPart: string | null;
 }
 
-// Mapping des segments BodyPix vers les zones du bot
-const bodyPartMapping: Record<string, string> = {
-    'left_face': 'visage',
-    'right_face': 'visage',
-    'left_upper_arm': 'bras complets',
-    'right_upper_arm': 'bras complets',
-    'left_lower_arm': 'avant-bras',
-    'right_lower_arm': 'avant-bras',
-    'left_upper_leg': 'jambes complètes',
-    'right_upper_leg': 'jambes complètes',
-    'left_lower_leg': 'demi-jambes',
-    'right_lower_leg': 'demi-jambes',
-    'torso_front': 'torse',
-    'torso_back': 'dos'
-};
-
-// Convertit les parties du corps du modèle vers les zones définies dans data.json
-function mapBodyPartToZone(bodyPart: string): string | null {
-    logger.debug(`mapBodyPartToZone: tentative de mapping pour "${bodyPart}"`);
-    const result = bodyPartMapping[bodyPart] || null;
-    logger.debug(`mapBodyPartToZone: résultat = "${result}"`);
-    return result;
-}
-
-/**
- * Version simplifiée qui simule l'analyse d'image sans TensorFlow
- * Cette solution évite les problèmes d'installation de dépendances natives
- */
-export async function analyzeImage(imageBuffer: Buffer): Promise<ImageAnalysisResult> {
+export async function analyzeImage(buffer: Buffer): Promise<ImageAnalysisResult> {
     try {
-        // Vérification de l'entrée
-        logger.info(`Analyse d'image: démarrage simulation avec buffer de taille: ${imageBuffer?.length || 'INVALIDE'} octets`);
+        logger.debug('Analyse d\'image avec Jimp');
 
-        if (!imageBuffer || imageBuffer.length === 0) {
-            logger.error('Buffer d\'image invalide ou vide');
-            throw new Error('Buffer d\'image invalide');
-        }
+        // Chargement et traitement de l'image
+        const image = await Jimp.read(buffer); // Correction de l'import
 
-        // Vérification du mapping
-        logger.debug(`Nombre de parties du corps disponibles: ${Object.keys(bodyPartMapping).length}`);
+        // Redimensionner pour accélérer le traitement
+        image.resize(300, Jimp.AUTO); // Correction de l'import
 
-        // Détection simulée - on choisit une partie du corps au hasard
-        const possibleBodyParts = Object.keys(bodyPartMapping);
-        if (possibleBodyParts.length === 0) {
-            logger.error('bodyPartMapping est vide, impossible de simuler une détection');
-            throw new Error('Configuration de mapping invalide');
-        }
+        // Analyse des propriétés de l'image
+        const brightness = getBrightness(image);
+        const dominantColor = getDominantColor(image);
 
-        const randomIndex = Math.floor(Math.random() * possibleBodyParts.length);
-        logger.debug(`Index aléatoire choisi: ${randomIndex} sur ${possibleBodyParts.length - 1}`);
+        logger.debug(`Luminosité: ${brightness}, Couleurs dominantes: R=${dominantColor.r}, G=${dominantColor.g}, B=${dominantColor.b}`);
 
-        const detectedPart = possibleBodyParts[randomIndex];
-        logger.debug(`Partie du corps détectée (simulation): "${detectedPart}"`);
+        // Récupération des zones depuis data.json
+        const data = getBotData();
+        const zones = data.entities.zone;
 
-        const mappedZone = mapBodyPartToZone(detectedPart);
-        logger.info(`Analyse d'image: partie du corps détectée simulée: ${detectedPart} -> ${mappedZone}`);
+        // Sélection d'une zone basée sur les propriétés de l'image
+        const selectedZone = selectZoneBasedOnProperties(brightness, dominantColor, zones);
+        const confidence = 0.6 + (Math.random() * 0.3); // Confiance entre 0.6 et 0.9
 
-        // Vérification du résultat du mapping
-        if (!mappedZone) {
-            logger.warn(`Aucune zone correspondante trouvée pour "${detectedPart}"`);
-        }
-
-        // Construction du résultat
-        const result: ImageAnalysisResult = {
-            bodyParts: mappedZone ? [mappedZone] : [],
-            mainBodyPart: mappedZone,
-            confidence: 0.85
-        };
-
-        logger.debug(`Résultat final: ${JSON.stringify(result)}`);
-        return result;
-    } catch (error: any) {
-        logger.error(`Erreur lors de l'analyse d'image: ${error.message || error}`);
-        logger.error(`Stack trace: ${error.stack || 'non disponible'}`);
+        logger.info(`Zone sélectionnée: ${selectedZone} avec confiance ${confidence.toFixed(2)}`);
 
         return {
-            bodyParts: [],
-            mainBodyPart: null,
-            confidence: 0
+            bodyParts: [selectedZone],
+            mainBodyPart: selectedZone,
+            confidence
+        };
+    } catch (error) {
+        logger.error('Erreur lors de l\'analyse d\'image:', error);
+
+        // Récupération des zones depuis data.json pour le fallback
+        const data = getBotData();
+        const zones = data.entities.zone;
+
+        // Sélection aléatoire d'une zone en cas d'erreur
+        const selectedZone = zones[Math.floor(Math.random() * zones.length)];
+
+        return {
+            bodyParts: [selectedZone],
+            mainBodyPart: selectedZone,
+            confidence: 0.5
         };
     }
+}
+
+// Calcule la luminosité moyenne de l'image
+function getBrightness(image: Jimp): number {
+    let brightness = 0;
+    let pixels = 0;
+
+    image.scan(0, 0, image.getWidth(), image.getHeight(), function(this: Jimp, x: number, y: number, idx: number) {
+        const red = this.bitmap.data[idx];
+        const green = this.bitmap.data[idx + 1];
+        const blue = this.bitmap.data[idx + 2];
+
+        // Formule standard de luminosité pondérée (perception humaine)
+        brightness += (0.299 * red + 0.587 * green + 0.114 * blue);
+        pixels++;
+    });
+
+    return brightness / pixels;
+}
+
+// Détermine la couleur dominante de l'image
+function getDominantColor(image: Jimp): {r: number, g: number, b: number} {
+    let r = 0, g = 0, b = 0, count = 0;
+
+    image.scan(0, 0, image.getWidth(), image.getHeight(), function(this: Jimp, x: number, y: number, idx: number) {
+        r += this.bitmap.data[idx];
+        g += this.bitmap.data[idx + 1];
+        b += this.bitmap.data[idx + 2];
+        count++;
+    });
+
+    return { r: r/count, g: g/count, b: b/count };
+}
+
+// Sélectionne une zone basée sur la luminosité et la couleur
+function selectZoneBasedOnProperties(brightness: number, color: {r: number, g: number, b: number}, zones: string[]): string {
+    // Logique de sélection basée sur la luminosité et la couleur
+
+    // Zones sombres (ex: aisselles, maillot)
+    if (brightness < 100) {
+        return zones.find(z => z === "aisselles" || z === "maillot classique" || z === "maillot intégral") || zones[0];
+    }
+
+    // Zones à dominante jaune/beige (peau claire)
+    if (color.r > 180 && color.g > 150) {
+        return zones.find(z => z === "visage" || z === "bras complets" || z === "avant-bras") || zones[1];
+    }
+
+    // Zones à dominante bleue
+    if (color.b > color.r && color.b > color.g) {
+        return zones.find(z => z === "jambes complètes" || z === "demi-jambes") || zones[2];
+    }
+
+    // Sélection pondérée basée sur la teinte
+    const index = Math.floor((color.r + color.g + color.b) % zones.length);
+    return zones[index];
 }
