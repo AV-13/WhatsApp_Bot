@@ -47,10 +47,11 @@ Le bot est capable de :
 - **Transcription via Deepgram API** (ou autre STT provider configurable)
 - Traitement du texte transcrit comme un message standard
 
-### 🖼️ Analyse d’images
-- Détection (simulée) de la **zone corporelle** à partir d’une photo
-- Association à un **tarif** correspondant dans `data.json`
-- Simulation réaliste (remplaçable par TensorFlow.js ou API IA)
+### 🖼️ Analyse d'images
+- Traitement d'images avec **Jimp** pour analyser les propriétés visuelles
+- Détection des zones corporelles basée sur la **luminosité** et les **couleurs dominantes**
+- Association automatique à un **tarif** correspondant dans `data.json`
+- Logique d'identification qui peut être enrichie avec des modèles ML plus avancés
 
 ### 📘 Base de connaissances
 - Tarifs par zone et par pack
@@ -198,7 +199,7 @@ Le bot expose deux routes :
 - Détection des zones corporelles basée sur la **luminosité** et les **couleurs dominantes**
 - Association automatique à un **tarif** correspondant dans `data.json`
 - Logique d'identification qui peut être enrichie avec des modèles ML plus avancés
-
+- 
 ---
 
 ## 🖼️ Captures d'écran
