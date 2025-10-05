@@ -1,80 +1,295 @@
-# SmartDuck WhatsApp Bot (Meta Cloud API) — Node/TypeScript
+# 🦆 SmartDuck WhatsApp Bot
 
-Bot WhatsApp minimal pour SmartDuck (épilation laser). Compatible **WhatsApp Cloud API** (Meta).
+Un **assistant conversationnel intelligent** pour les services d'épilation laser, développé avec **Node.js**, **TypeScript** et l’**API WhatsApp Cloud de Meta**.  
+Ce bot répond automatiquement aux questions des clients, fournit les **tarifs**, gère les **rendez-vous**, transcrit les **messages vocaux**, et peut même **analyser les images** pour identifier les zones corporelles à traiter.
 
-## Fonctionnalités (MVP)
-- Réponses FAQ (prestations, tarifs, prise d’info/RDV, handover humain).
-- Support **texte** ; **audio** (transcription optionnelle avec STT) ; **images** (accusé simple).
-- i18n basique (FR, EN).
+---
 
-## Prérequis
-- Node.js >= 18.17
-- Un compte **Meta for Developers** et l'onglet **WhatsApp** configuré (numéro de test dispo).
-- Un URL public pour le webhook (ex. **ngrok**).
+## 📚 Sommaire
 
-## Setup
-1. **Cloner** ce repo et installer :
-   ```bash
-   npm i
-   cp .env.example .env
-   # remplace les valeurs Meta : WHATSAPP_TOKEN, WHATSAPP_PHONE_NUMBER_ID, WHATSAPP_VERIFY_TOKEN
-   ```
-2. **Lancer en dev** :
-   ```bash
-   npm run dev
-   ```
-3. **Exposer le webhook** :
-   ```bash
-   npx ngrok http 3000
-   ```
-4. **Configurer Meta (Cloud API)** :
-   - URL de callback : `https://<ton-ngrok>/webhook`
-   - Verify token : valeur de `WHATSAPP_VERIFY_TOKEN` dans `.env`
-   - Souscriptions : `messages` (et `message_template_status_update` si besoin)
+- [Introduction](#introduction)
+- [Fonctionnalités](#fonctionnalités)
+- [Technologies utilisées](#technologies-utilisées)
+- [Installation et configuration](#installation-et-configuration)
+- [Structure du projet](#structure-du-projet)
+- [Fonctionnement](#fonctionnement)
+- [Captures d'écran](#captures-décran)
+- [Améliorations possibles](#améliorations-possibles)
+- [Développement et contribution](#développement-et-contribution)
 
-## Test rapide
-- Depuis l'onglet WhatsApp **API Setup**, envoie un message depuis le **numéro de test** à ton propre WhatsApp.
-- Le bot répondra par un message de bienvenue si tout est OK.
+---
 
-## Commandes
-- `npm run dev`  — watch + reload (tsx)
-- `npm run build` — compile TypeScript -> dist
-- `npm start` — démarre depuis `dist`
-- `npm test` — tests Jest
+## 🧠 Introduction
 
-## Structure
+**SmartDuck WhatsApp Bot** est une solution complète d’assistance virtuelle dédiée aux établissements d’épilation laser.  
+Son objectif est de **simplifier la communication client via WhatsApp**, d’offrir une expérience fluide et de **répondre instantanément aux demandes fréquentes**.
+
+Le bot est capable de :
+- Identifier l’intention d’un utilisateur (tarif, horaire, prestation…)
+- Répondre de manière contextuelle et naturelle
+- Traiter des **messages texte, audio et image**
+- Fournir des **liens de réservation**, **tarifs**, et **informations pratiques**
+
+> 💡 Ce projet est à la fois un exercice technique et une base solide pour une automatisation réelle.
+
+---
+
+## ⚙️ Fonctionnalités
+
+### 💬 Traitement des messages texte
+- Détection d’intentions via **expressions régulières** et **fuzzy matching**
+- Reconnaissance d’entités : zones corporelles, villes, horaires, etc.
+- Réponses dynamiques à partir d’une **base JSON** (`data.json`)
+- Quick replies pour une navigation fluide
+
+### 🎙️ Traitement audio
+- Réception des **messages vocaux WhatsApp**
+- **Transcription via Deepgram API** (ou autre STT provider configurable)
+- Traitement du texte transcrit comme un message standard
+
+### 🖼️ Analyse d’images
+- Détection (simulée) de la **zone corporelle** à partir d’une photo
+- Association à un **tarif** correspondant dans `data.json`
+- Simulation réaliste (remplaçable par TensorFlow.js ou API IA)
+
+### 📘 Base de connaissances
+- Tarifs par zone et par pack
+- Horaires et adresses des établissements
+- Protocole avant/après séance
+- Informations générales et FAQ
+
+### 📅 Gestion des rendez-vous
+- Redirection vers le système de réservation (URL factice, mais configurable dans le cas d'une utilisation professionnelle)
+- Informations sur les disponibilités par ville
+
+---
+
+## 🛠️ Technologies utilisées
+
+| Domaine | Technologie |
+|----------|--------------|
+| **Backend** | Node.js, TypeScript, Express |
+| **API** | WhatsApp Cloud API (Meta) |
+| **NLP** | Regex, fuzzy matching, JSON d’intentions |
+| **Speech-to-Text** | Deepgram API (configurable) |
+| **Analyse d’image** | Simulation (remplaçable par TensorFlow.js / CLIP) |
+| **Configuration** | dotenv |
+| **Logging** | Winston logger personnalisé |
+
+---
+
+## ⚙️ Installation et configuration
+
+### 🔧 Prérequis
+- Node.js **v16+**
+- Compte **Meta for Developers**
+- **Numéro WhatsApp Business** associé
+- Clé **API Deepgram** *(optionnelle pour le STT)*
+
+---
+
+### 📦 Installation
+
+```bash
+# Cloner le dépôt
+git clone https://github.com/votre-compte/whatsapp_bot.git
+cd whatsapp_bot
+
+# Installer les dépendances
+npm install
+
+# Copier et éditer les variables d'environnement
+cp .env.example .env
+```
+
+---
+
+### ⚙️ Configuration des variables d'environnement
+
+```bash
+# WhatsApp Cloud API (Meta)
+WHATSAPP_TOKEN=votre_token_whatsapp
+WHATSAPP_VERIFY_TOKEN=votre_token_verification
+WHATSAPP_API_BASE=https://graph.facebook.com/v21.0
+WHATSAPP_PHONE_NUMBER_ID=votre_id_telephone
+
+# Serveur
+PORT=3000
+APP_URL=https://votre-url.com
+
+# Speech-to-Text
+STT_PROVIDER=deepgram
+STT_API_KEY=votre_cle_deepgram
+```
+
+---
+
+# 📊 Architecture du data.json
+
+Le fichier data.json est au cœur de l'intelligence du bot - un choix architectural délibéré pour faciliter la maintenance sans dépendre d'une base de données. Ce fichier unique centralise :  
+- metadata : Informations de version et marque
+- entities : Listes des éléments reconnaissables (zones corporelles, villes...)
+- intents : Collection d'intentions utilisateur avec leurs patterns regex et réponses associées
+- kb (knowledge base) : Base de connaissances structurée (tarifs, horaires, protocole...)
+- routing : Configuration de priorité des intentions
+- post_processing : Règles de normalisation des textes et fuzzy matching
+Ce modèle offre plusieurs avantages : déploiement simple, modification rapide des contenus sans redéploiement, pas de dépendance externe, et une expérience conversationnelle cohérente. L'approche basée sur les expressions régulières et le fuzzy matching permet une détection d'intention efficace sans nécessiter d'infrastructure ML complexe.
+
+---
+
+### 🚀 Démarrage
+
+```bash
+# Démarrer en mode développement
+npm run dev
+
+# Construire et démarrer en production
+npm run build
+npm start
+```
+
+---
+
+## 📁 Structure du projet
+
 ```
 src/
-  index.ts
-  webhook.ts
-  config.ts
-  services/
-    whatsappClient.ts
-    mediaService.ts
-    sttService.ts
-    nlp.ts
-    faqService.ts
-    i18n.ts
-  utils/
-    types.ts
-    logger.ts
-data/
-  intents.fr.json
-  intents.en.json
-tests/
-  webhook.int.test.ts
-  nlp.unit.test.ts
+├── config.js                 # Configuration générale de l'app
+├── index.ts                  # Point d'entrée principal
+├── webhook.ts                # Gestionnaire des webhooks WhatsApp
+├── data.json                 # Base de connaissances (intents & réponses)
+├── services/
+│   ├── dataService.ts        # Gestion des données du bot
+│   ├── imageService.ts       # Analyse d'image (simulation)
+│   ├── sttService.ts         # Service de reconnaissance vocale
+│   ├── nlp.ts                # Analyse des intentions et entités
+│   └── whatsappClient.ts     # Envoi et réception via WhatsApp Cloud API
+└── utils/
+    ├── logger.js             # Logger Winston
+    └── types.ts              # Définitions de types TypeScript
 ```
 
-## Notes STT (audio)
-- Par défaut `STT_PROVIDER=none` => on répond qu'on a reçu le vocal, sans transcription.
-- Pour activer Whisper (OpenAI), mets `STT_PROVIDER=whisper` + `STT_API_KEY` (voir `src/services/sttService.ts`).
+---
 
-## Sécurité
-- Ne **committe** jamais `.env`.
-- Les URLs médias sont temporaires → télécharge immédiatement puis traite.
-- Gère les erreurs proprement (timeouts, token expiré, payloads inconnus).
+## ⚙️ Fonctionnement
 
-## Déploiement
-- Render / Railway / Fly.io (process Node long-running) ou Docker.
-- Assure-toi d'exposer `/webhook` en HTTPS et d'autoriser l'IP sortante pour Meta si nécessaire.
+### 📡 Webhook WhatsApp
+Le bot expose deux routes :
+| Route | Description |
+|--------|--------------|
+| `GET /webhook` | Vérification du webhook (Meta) |
+| `POST /webhook` | Réception des messages et événements |
+
+---
+
+### 🔄 Traitement d’un message
+1. Le webhook reçoit le message utilisateur.
+2. Le type est détecté : **texte**, **audio**, **image**.
+3. - Si texte → **analyse NLP** (regex/fuzzy).
+- Si audio → **transcription via STT** → texte → NLP.
+- Si image → **simulation d’analyse de zone**.
+4. Le bot récupère la réponse dans `data.json`.
+5. La réponse est envoyée à l’utilisateur via **WhatsApp Cloud API**.
+
+---
+
+### 🧠 Analyse d’image (simulation)
+Pour la version actuelle, l’analyse d’image est **simulée** :
+- Une zone corporelle est sélectionnée **aléatoirement**.
+- Cette zone est associée à un tarif depuis `data.json`.
+- Le bot envoie une réponse correspondante.
+
+*(Une vraie détection via TensorFlow.js ou CLIP est prévue en amélioration.)*
+
+---
+
+## 🖼️ Captures d'écran
+
+Exemples d'interactions :
+- 💬 Conversation de base avec le bot
+
+  <p align="center">
+    <img src="assets/images/conv.jpeg" alt="title" width="400" />
+  </p>
+
+- 🖼️ Analyse d'une image
+
+  <p align="center">
+    <img src="assets/images/image.png" alt="title" width="400" />
+  </p>
+
+- 🎙️ Transcription audio
+
+  <p align="center">
+    <img src="assets/images/audio.jpeg" alt="title" width="400" />
+  </p>
+
+---
+
+## 🚀 Améliorations possibles
+
+### 🔬 Analyse d'image avancée
+- TensorFlow.js avec modèle **BodyPix**
+- API externes : **Google Vision**, **Azure Computer Vision**
+- Modèle **CLIP (zero-shot)** pour labels dynamiques
+
+### 🧠 NLP amélioré
+- Modèle de classification d’intentions (Naive Bayes / ML)
+- Gestion de sessions utilisateurs
+- Détection d’entités plus robuste
+
+### 🧾 Intégration CRM
+- Connexion à un système de gestion de rendez-vous
+- Synchronisation des clients (CRM)
+
+### 💳 Paiement & facturation
+- Intégration d’un module de paiement (Stripe, PayPal)
+
+### 🌍 Multilingue
+- Support complet **FR / EN**
+- Détection automatique de la langue
+- 
+### Améliorations des réponses
+- Réponses plus naturelles
+- Plus de mots clés
+
+---
+
+## 👩‍💻 Développement et contribution
+
+### Environnement de développement
+
+```bash
+# Démarrage avec rechargement à chaud
+npm run dev
+
+# Lancer les tests unitaires
+npm test
+
+# Vérifier la qualité du code
+npm run lint
+```
+
+---
+
+Pour exposer l'environnement local :
+
+```bash
+ngrok http 3000
+```
+
+---
+
+## 🧩 Licence
+
+Ce projet est proposé à titre **éducatif et démonstratif**.
+
+---
+
+## 🦆 Auteur
+
+**Augustin Vathonne**  
+💌 augustinvathonne@gmail.com 
+🌐 [https://github.com/AV-13](https://github.com/AV-13)
+
+---

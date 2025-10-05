@@ -1,0 +1,430 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "brand": "SmartDuck",
+    "locale_default": "fr",
+    "disclaimer": "Toutes les données sont factices pour un exercice (tarifs, horaires, adresses, promos).",
+    "notes": "Approche mots-clés/regex/fuzzy. Les regex sont insensibles à la casse. Les entités sont à adapter si besoin."
+  },
+  "entities": {
+    "zone": [
+      "aisselles",
+      "jambes complètes",
+      "demi-jambes",
+      "avant-bras",
+      "bras complets",
+      "maillot classique",
+      "maillot intégral",
+      "torse",
+      "dos",
+      "visage",
+      "lèvre supérieure",
+      "menton",
+      "joues",
+      "nuque"
+    ],
+    "ville": [
+      "Paris 15e",
+      "Lyon Part-Dieu",
+      "Marseille Prado",
+      "Lille Centre",
+      "Bordeaux Chartrons",
+      "Toulouse Jean-Jaurès",
+      "Nantes Graslin"
+    ],
+    "jour": ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"],
+    "mode_paiement": ["carte", "espèces", "virement", "paypal"],
+    "canal": ["whatsapp", "site", "téléphone"]
+  },
+  "variables_defaults": {
+    "booking_url": "https://exemple.smartduck.fr/reserver",
+    "pricing_url": "https://exemple.smartduck.fr/tarifs",
+    "faq_url": "https://exemple.smartduck.fr/faq",
+    "privacy_url": "https://exemple.smartduck.fr/confidentialite",
+    "contact_phone": "+33 1 86 00 00 00",
+    "contact_email": "contact@smartduck.fr"
+  },
+  "kb": {
+    "tarifs": {
+      "monozone": [
+        { "zone": "aisselles", "prix": 39 },
+        { "zone": "demi-jambes", "prix": 79 },
+        { "zone": "jambes complètes", "prix": 149 },
+        { "zone": "maillot classique", "prix": 59 },
+        { "zone": "maillot intégral", "prix": 89 },
+        { "zone": "avant-bras", "prix": 69 },
+        { "zone": "torse", "prix": 129 },
+        { "zone": "dos", "prix": 139 },
+        { "zone": "visage", "prix": 59 },
+        { "zone": "bras complets", "prix": 89 }
+      ],
+      "packs": [
+        { "nom": "Pack 3 séances - petites zones", "zones": ["aisselles", "lèvre supérieure", "menton"], "prix": 99 },
+        { "nom": "Pack 6 séances - jambes complètes", "zones": ["jambes complètes"], "prix": 799 },
+        { "nom": "Pack Duo - maillot + aisselles (3 séances)", "zones": ["maillot classique", "aisselles"], "prix": 239 }
+      ],
+      "promos_actives": [
+        { "nom": "Offre de lancement", "desc": "-15% sur la 1ère séance", "code": "DUCK15", "expire_le": "2025-12-31" }
+      ]
+    },
+    "horaires": {
+      "Paris 15e": { "lun_ven": "09:30–19:30", "sam": "10:00–18:00" },
+      "Lyon Part-Dieu": { "lun_ven": "10:00–19:00", "sam": "10:00–17:00" },
+      "Marseille Prado": { "lun_ven": "09:30–19:00", "sam": "10:00–17:00" }
+    },
+    "adresses": {
+      "Paris 15e": "12 Rue des Canetons, 75015 Paris",
+      "Lyon Part-Dieu": "5 Rue du Lac, 69003 Lyon",
+      "Marseille Prado": "80 Av. du Prado, 13008 Marseille"
+    },
+    "protocole": {
+      "seances_typiques": "6 à 8 séances (exercice), espacées de 4 à 6 semaines.",
+      "duree_seance": "De 15 à 60 minutes selon la zone.",
+      "avant_seance": [
+        "Raser la zone 24–48h avant.",
+        "Pas d’autobronzant 7 jours avant.",
+        "Peau propre et sèche le jour J."
+      ],
+      "apres_seance": [
+        "Hydrater la zone 24–48h.",
+        "Éviter soleil/UV 48h.",
+        "Pas de gommage 72h."
+      ],
+      "douleur": "Sensations de picotements brefs; intensité variable selon la zone (exercice)."
+    },
+    "paiement": {
+      "moyens_acceptes": ["carte", "espèces"],
+      "facilites": "Possibilité d’échelonner à partir de 200€ (exercice)."
+    },
+    "entreprise": {
+      "pitch": "Épilation laser premium, parcours clair, tarifs transparents (exercice).",
+      "certifs": ["Opérateurs formés (exercice)", "Traçabilité des séances (exercice)"],
+      "delai_contact": "Réponse sous 24h ouvrées (exercice)."
+    }
+  },
+  "intents": [
+    {
+      "id": "greetings",
+      "description": "Salutations et entrée en matière",
+      "priority": 10,
+      "patterns": [
+        "\\b(bonjour|salut|hello|coucou|bonsoir)\\b",
+        "\\b(j\\s*ai|j aimerais|je voudrais).*\\b(information|renseignement)\\b"
+      ],
+      "fuzzy": ["bonjoru", "bonjoure", "slut", "bonsoirr"],
+      "examples_user": ["Bonjour", "Salut, j’ai une question", "Hello SmartDuck"],
+      "response": {
+        "template_fr": "Bonjour 👋 Je suis l’assistant SmartDuck (exercice). Je peux vous aider sur : *Tarifs*, *Prestations*, *RDV*, *Horaires*, *Contact*. Dites-moi ce que vous cherchez 😉",
+        "quick_replies": ["Tarifs", "Prestations", "Prendre RDV", "Horaires", "Contact"]
+      }
+    },
+    {
+      "id": "help_menu",
+      "description": "Présenter le menu d’aide",
+      "priority": 9,
+      "patterns": [
+        "\\b(aide|menu|options?|que peux[- ]tu faire|comment ca marche)\\b"
+      ],
+      "examples_user": ["Tu fais quoi ?", "Aide", "Montre le menu"],
+      "response": {
+        "template_fr": "Voici ce que je peux faire :\n• Tarifs par zone et packs\n• Prestations & protocole (exercice)\n• Prise de RDV (lien)\n• Horaires & adresses\n• Contact\n\nQue puis-je faire pour vous ?",
+        "quick_replies": ["Tarifs", "Prestations", "Prendre RDV", "Horaires", "Contact"]
+      }
+    },
+    {
+      "id": "pricing_general",
+      "description": "Questions générales sur les prix",
+      "priority": 8,
+      "patterns": [
+        "\\b(tarif|tarifs|prix|devis|combien|€|euro|cher|cout|coût)\\b"
+      ],
+      "examples_user": ["Quels sont vos tarifs ?", "Combien ça coûte ?", "Avez-vous des packs ?"],
+      "response": {
+        "template_fr": "Voici un aperçu (exercice) :\n- Aisselles : 39€ / séance\n- Demi-jambes : 79€ / séance\n- Jambes complètes : 149€ / séance\n- Maillot classique : 59€ / séance\n\n👉 Grille complète : {pricing_url}\nVous pouvez me dire une *zone* précise pour le détail.",
+        "quick_replies": ["Aisselles", "Demi-jambes", "Jambes complètes", "Maillot", "Voir les packs"]
+      }
+    },
+    {
+      "id": "pricing_zone",
+      "description": "Prix pour une zone donnée",
+      "priority": 8,
+      "patterns": [
+        "(tarif|prix).*(aisselles|demi[- ]?jambes?|jambes? compl[eé]tes?|maillot|torse|dos|avant[- ]?bras|visage|levre|l[eè]vre|menton|joues|nuque)",
+        "(combien|prix).*(aisselles|demi[- ]?jambes?|jambes? compl[eé]tes?|maillot|torse|dos|avant[- ]?bras|visage|levre|l[eè]vre|menton|joues|nuque)"
+      ],
+      "slots": [
+        {
+          "name": "zone",
+          "type": "zone",
+          "required": true,
+          "prompt_fr": "Pour quelle *zone* souhaitez-vous le tarif ? (ex: aisselles, demi-jambes, maillot…)"
+        }
+      ],
+      "examples_user": ["Prix aisselles ?", "Tarif jambes complètes", "Combien pour le maillot ?"],
+      "response": {
+        "template_fr": "Tarif (exercice) pour **{zone}** : **{prix_zone}€ / séance**.\nPacks disponibles selon la zone. 👉 Grille complète : {pricing_url}",
+        "variables": ["zone", "prix_zone"],
+        "quick_replies": ["Voir les packs", "Prendre RDV", "Autre zone"]
+      }
+    },
+    {
+      "id": "pricing_packs",
+      "description": "Packs et promotions",
+      "priority": 7,
+      "patterns": [
+        "\\b(pack|forfait|abonnement|promo|promotion|reduction|réduction|code promo|offre)\\b"
+      ],
+      "examples_user": ["Avez-vous des packs ?", "Des promos en ce moment ?"],
+      "response": {
+        "template_fr": "Voici nos offres (exercice) :\n- Pack 3 séances petites zones : 99€\n- Pack 6 séances jambes complètes : 799€\n- Pack Duo maillot + aisselles (3 séances) : 239€\n- Promo active : 'DUCK15' = -15% 1ère séance (jusqu'au 31/12/2025)\nDétails : {pricing_url}",
+        "quick_replies": ["Prendre RDV", "Tarifs par zone", "Conditions de l’offre"]
+      }
+    },
+    {
+      "id": "services_zones",
+      "description": "Prestations et zones traitées",
+      "priority": 8,
+      "patterns": [
+        "\\b(prestations?|services?|zones?|traitements?)\\b",
+        "quelles? zones? traitez"
+      ],
+      "examples_user": ["Quelles zones traitez-vous ?", "Quelles prestations ?", "Faites-vous le visage ?"],
+      "response": {
+        "template_fr": "Nous proposons (exercice) : aisselles, jambes (demi/complètes), maillot (classique/intégral), avant-bras, torse, dos, visage (lèvre, menton, joues), nuque. Dites une zone pour connaître le tarif.",
+        "quick_replies": ["Tarif Aisselles", "Tarif Jambes complètes", "Tarif Maillot", "Prendre RDV"]
+      }
+    },
+    {
+      "id": "protocol_overview",
+      "description": "Protocole : nb de séances, rythme, durée",
+      "priority": 6,
+      "patterns": [
+        "\\b(seances?|séances?|nombre de seances?|combien de seances?)\\b",
+        "\\b(rythme|intervalle|frequence|fréquence)\\b",
+        "\\b(duree|durée)\\b"
+      ],
+      "examples_user": ["Combien de séances ?", "Tous les combien ?", "Durée d'une séance ?"],
+      "response": {
+        "template_fr": "En moyenne **6 à 8 séances** (exercice), espacées de **4 à 6 semaines**. Durée par séance : **15 à 60 min** selon la zone.",
+        "quick_replies": ["Préparer ma séance", "Après la séance", "Prendre RDV"]
+      }
+    },
+    {
+      "id": "prep_before",
+      "description": "Conseils avant la séance",
+      "priority": 5,
+      "patterns": [
+        "avant la seance|preparer la seance|preparation|raser|rasage|venir comment"
+      ],
+      "examples_user": ["Comment préparer la séance ?", "Faut-il raser avant ?", "Que faire avant ?"],
+      "response": {
+        "template_fr": "Avant la séance (exercice) :\n• Raser la zone 24–48h avant\n• Pas d’autobronzant 7 jours avant\n• Peau propre et sèche le jour J",
+        "quick_replies": ["Après la séance", "Prendre RDV"]
+      }
+    },
+    {
+      "id": "aftercare",
+      "description": "Conseils après la séance",
+      "priority": 5,
+      "patterns": [
+        "apres la seance|après la séance|soins apres|apres|rougeurs"
+      ],
+      "examples_user": ["Que faire après ?", "Y a-t-il des soins après ?", "Rougeurs, que faire ?"],
+      "response": {
+        "template_fr": "Après la séance (exercice) :\n• Hydrater 24–48h\n• Éviter soleil/UV 48h\n• Pas de gommage 72h",
+        "quick_replies": ["Préparer ma séance", "Prendre RDV"]
+      }
+    },
+    {
+      "id": "pain_tolerance",
+      "description": "Ressenti / douleur (formulation prudente, non médicale)",
+      "priority": 4,
+      "patterns": [
+        "\\b(douleur|douloureux|ca fait mal|ça fait mal|sensations?)\\b"
+      ],
+      "examples_user": ["Est-ce que ça fait mal ?", "Niveau de douleur ?"],
+      "response": {
+        "template_fr": "La plupart des personnes décrivent des **picotements brefs** (exercice). L’intensité varie selon la zone et la sensibilité.",
+        "quick_replies": ["Combien de séances ?", "Prendre RDV"]
+      }
+    },
+    {
+      "id": "booking",
+      "description": "Prise de rendez-vous",
+      "priority": 9,
+      "patterns": [
+        "\\b(rdv|rendez.?vous|reser(v|)ation|prendre rdv|book|appointment)\\b"
+      ],
+      "examples_user": ["Je veux prendre RDV", "Comment réserver ?"],
+      "response": {
+        "template_fr": "Pour réserver, cliquez ici 👉 {booking_url}\nSouhaitez-vous choisir une ville d’abord ?",
+        "quick_replies": ["Paris 15e", "Lyon Part-Dieu", "Marseille Prado", "Par téléphone"]
+      }
+    },
+    {
+      "id": "reschedule_cancel",
+      "description": "Modifier/annuler un rendez-vous",
+      "priority": 6,
+      "patterns": [
+        "deplacer|déplacer|annuler|modifier.*rdv"
+      ],
+      "examples_user": ["Je dois annuler", "Je veux déplacer mon RDV"],
+      "response": {
+        "template_fr": "Pas de souci (exercice) : vous pouvez **modifier/annuler** via l’email/SMS de confirmation, ou contactez-nous : {contact_phone}.",
+        "quick_replies": ["Contacter", "Nouveau RDV"]
+      }
+    },
+    {
+      "id": "locations",
+      "description": "Adresses et villes",
+      "priority": 7,
+      "patterns": [
+        "\\b(ou|où|adresses?|adresse|localisation|magasin|salon|centre|agence)\\b"
+      ],
+      "examples_user": ["Vous êtes où ?", "Adresse Paris ?", "Avez-vous un centre à Lyon ?"],
+      "response": {
+        "template_fr": "Nous accueillons (exercice) :\n• Paris 15e — 12 Rue des Canetons, 75015\n• Lyon Part-Dieu — 5 Rue du Lac, 69003\n• Marseille Prado — 80 Av. du Prado, 13008\nSouhaitez-vous les horaires ?",
+        "quick_replies": ["Horaires Paris 15e", "Horaires Lyon", "Prendre RDV"]
+      }
+    },
+    {
+      "id": "opening_hours",
+      "description": "Horaires d’ouverture (globaux ou par ville)",
+      "priority": 7,
+      "patterns": [
+        "horaires?|ouvert|ouverture|fermeture|heures d ouverture"
+      ],
+      "slots": [
+        { "name": "ville", "type": "ville", "required": false, "prompt_fr": "Pour quelle ville voulez-vous les horaires ?" }
+      ],
+      "examples_user": ["Quels sont vos horaires ?", "Horaires Paris 15e ?"],
+      "response": {
+        "template_fr": "Horaires (exercice) pour **{ville_ou_global}** : {horaires_ville}\nAstuce : réservez en ligne pour voir les créneaux en temps réel 👉 {booking_url}",
+        "variables": ["ville_ou_global", "horaires_ville"],
+        "quick_replies": ["Prendre RDV", "Adresse"]
+      }
+    },
+    {
+      "id": "contact",
+      "description": "Coordonnées de contact",
+      "priority": 6,
+      "patterns": [
+        "contact|telephone|t[eé]l[eé]phone|num[eé]ro|mail|email|e[- ]?mail|joindre"
+      ],
+      "examples_user": ["Un numéro ?", "Je peux vous joindre comment ?"],
+      "response": {
+        "template_fr": "Vous pouvez nous joindre (exercice) :\n• Téléphone : {contact_phone}\n• Email : {contact_email}\n• Formulaire : {faq_url}",
+        "quick_replies": ["Prendre RDV", "Horaires", "Tarifs"]
+      }
+    },
+    {
+      "id": "payment",
+      "description": "Moyens de paiement et facilités",
+      "priority": 4,
+      "patterns": [
+        "payer|paiement|carte|especes|espèces|virement|paypal|cb|visa|mastercard|amex"
+      ],
+      "examples_user": ["Prenez-vous la carte ?", "Paiement en plusieurs fois ?"],
+      "response": {
+        "template_fr": "Moyens acceptés (exercice) : **carte** et **espèces**. Échelonnement possible à partir de 200€.",
+        "quick_replies": ["Tarifs", "Prendre RDV"]
+      }
+    },
+    {
+      "id": "promo_conditions",
+      "description": "Conditions des promos/codes",
+      "priority": 4,
+      "patterns": [
+        "conditions? (de )?l offre|code promo|utiliser.*code|valable jusqu"
+      ],
+      "examples_user": ["Conditions DUCK15 ?", "Le code marche jusqu’à quand ?"],
+      "response": {
+        "template_fr": "Code **DUCK15** (exercice) : -15% sur la 1ère séance, valable jusqu’au 31/12/2025, non cumulable, hors packs.",
+        "quick_replies": ["Tarifs", "Prendre RDV"]
+      }
+    },
+    {
+      "id": "about_company",
+      "description": "À propos / pitch / garanties",
+      "priority": 3,
+      "patterns": [
+        "qui etes vous|qui êtes vous|a propos|à propos|smartduck|qualite|qualité|garanties?|certif|certifications?"
+      ],
+      "examples_user": ["C’est quoi SmartDuck ?", "Avez-vous des garanties ?"],
+      "response": {
+        "template_fr": "SmartDuck (exercice) : épilation laser premium, parcours clair et tarifs transparents. Opérateurs formés et suivi rigoureux.",
+        "quick_replies": ["Tarifs", "Prestations", "Prendre RDV"]
+      }
+    },
+    {
+      "id": "privacy_gdpr",
+      "description": "Confidentialité & données (exercice, non contractuel)",
+      "priority": 2,
+      "patterns": [
+        "donnees|données|rgpd|confidentialit[eé]|privacy|vie priv[eé]e"
+      ],
+      "examples_user": ["Que faites-vous de mes données ?", "RGPD ?"],
+      "response": {
+        "template_fr": "Exercice : vos échanges servent à répondre à vos questions et à améliorer le service. Plus d’infos : {privacy_url}.",
+        "quick_replies": ["Contact", "Prendre RDV"]
+      }
+    },
+    {
+      "id": "handoff_human",
+      "description": "Basculer vers un humain",
+      "priority": 1,
+      "patterns": [
+        "parler.*(humain|conseiller|personne)|rappeler|appel.*conseiller"
+      ],
+      "examples_user": ["Je veux parler à quelqu’un", "Puis-je être rappelé ?"],
+      "response": {
+        "template_fr": "Je transmets (exercice) à un conseiller. L’un d’eux vous recontacte sous 24h ouvrées. Laissez *nom* et *numéro*, svp.",
+        "quick_replies": ["Laisser mes coordonnées", "Contact"]
+      }
+    },
+    {
+      "id": "thanks",
+      "description": "Remerciements",
+      "priority": 10,
+      "patterns": [
+        "\\b(merci|thanks|thx|thank you)\\b"
+      ],
+      "examples_user": ["Merci !", "Cimer"],
+      "response": {
+        "template_fr": "Avec plaisir 🧡 Si besoin, je peux aussi vous donner les *tarifs*, *horaires* ou un lien pour *prendre RDV*.",
+        "quick_replies": ["Tarifs", "Prendre RDV", "Horaires"]
+      }
+    },
+    {
+      "id": "fallback_unknown",
+      "description": "Quand aucune règle ne matche",
+      "priority": 0,
+      "patterns": [],
+      "response": {
+        "template_fr": "Je n’ai pas bien compris 😅 Pouvez-vous reformuler ? Exemples : *Tarifs*, *Prestations*, *Prendre RDV*, *Horaires*, *Contact*.",
+        "quick_replies": ["Tarifs", "Prestations", "Prendre RDV", "Contact"]
+      }
+    }
+  ],
+  "post_processing": {
+    "normalize": {
+      "lowercase": true,
+      "remove_accents": true,
+      "trim": true,
+      "collapse_spaces": true
+    },
+    "fuzzy": {
+      "max_distance": 2,
+      "apply_on": ["keywords_user", "entities.zone", "entities.ville"]
+    }
+  },
+  "routing": {
+    "order": ["greetings", "help_menu", "pricing_zone", "pricing_general", "pricing_packs", "services_zones", "booking", "locations", "opening_hours", "contact", "protocol_overview", "prep_before", "aftercare", "pain_tolerance", "payment", "promo_conditions", "about_company", "privacy_gdpr", "thanks", "handoff_human", "fallback_unknown"],
+    "stop_on_first_match": true
+  },
+  "templates_helpers": {
+    "zone_to_price_map_hint": "Au runtime, mappez {zone} -> prix depuis kb.tarifs.monozone.",
+    "opening_hours_builder_hint": "Si {ville} manquante, renvoyer un résumé global (ex: \"lun–ven 10–19, sam 10–17\").",
+    "buttons_actions_supported": ["OPEN_URL", "CALL_PHONE", "COPY_CODE", "BOOKING"]
+  }
+}
